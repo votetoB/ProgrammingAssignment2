@@ -1,7 +1,7 @@
 ## My plan is to copy the example's approach
 ## 
 
-## Same constructor as in the example
+## Same constructor as in the example, nothing more.
 makeCacheMatrix <- function(x = matrix()) {
     i <- NULL
     set <- function(y) {
@@ -17,22 +17,26 @@ makeCacheMatrix <- function(x = matrix()) {
 }
 
 
-## 
 
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+    ## Return a matrix that is the inverse of 'x'
+    ## Algorighm I used can be found at:
+    ## https://en.wikipedia.org/wiki/Gaussian_elimination#Finding_the_inverse_of_a_matrix
     
     i <- x$getSolve()
     if(!is.null(i)) {
         message("getting cached data")
         return(i)
     }
+    
     data <- x$get()
+    
+    #Dimension of the matrix will be usefull later
     N <- nrow(data)
     ## Make an augmented (new word for me :) matrix 
     augmented <- cbind(data, diag(N))
     
-    ## makes gaussian transform for the row j
+    ## function, that makes gaussian transform for the row j
     makerow <- function (j) {
         #dividing the row by it's main element
         divisor <- augmented[j, j]
@@ -45,7 +49,7 @@ cacheSolve <- function(x, ...) {
         }
     }
     
-    #swappng two selected rows
+    #function to swap two rows of our matrix
     swaprows <- function(j, s){
         t <- augmented[j, ]
         augmented[j, ] <<- augmented[s, ]
@@ -53,11 +57,15 @@ cacheSolve <- function(x, ...) {
     }
     
     for (j in 1:N){
-        #check for diagonal element != 0
+        #check for diagonal element != 0. If not, find the row with non-zero value
+        #                                         at this column
         z <- j + 1
         while (augmented[j, j] == 0){
-            z <- z + 1
             swaprows(j, z)
+            z <- z + 1
+            
+            ## if matrix is irrevertable (det(A) == 0), we will get here and
+            ##                                          return "MISTAKE"!
             if (z > N){return ("MISTAKE")}
         }
         makerow(j)
